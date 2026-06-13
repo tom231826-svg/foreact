@@ -1,0 +1,6 @@
+{
+  "_README": "Illustrative free-text field notes (community_id -> note), the kind a community officer might send by radio or message after a trigger. With `--llm`, ForeAct turns these into structured, reviewable assumptions (e.g. access difficulty, clinic open/closed) that feed the ranking. With no AI backend they are ignored and the deterministic scorer runs unchanged.",
+  "fji-ba-001": "Main access bridge washed out in last week's flooding; the community is now reachable only by boat. The health post flooded and has been closed since Tuesday.",
+  "fji-ta-004": "A new sealed road opened this year, so the town is much easier to reach now.",
+  "fji-ra-002": "The elderly evacuation shelter lost part of its roof in the last cyclone and is not usable."
+}

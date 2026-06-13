@@ -56,19 +56,34 @@ foreact check
 # Generate a ranked anticipatory-action brief
 foreact run --out outputs/demo
 
-# Try the flood trigger path
-foreact run --event examples/flood_trigger.json --out outputs/flood-demo
+# Try the flood trigger path (global --event goes before the subcommand)
+foreact --event examples/flood_trigger.json run --out outputs/flood-demo
 ```
 
 Open `outputs/demo/brief.md` after running the sample.
 
 ## Why AI is essential
 
-The core scoring formula is intentionally transparent and testable. The AI value
-is the operational layer around it: converting scattered public documents,
-messy facility/community notes and hazard products into structured assumptions,
-ranked recommendations and a plain-language decision brief in minutes. Every
-assumption remains visible for human review.
+The scoring formula is deliberately transparent, testable and deterministic — the
+auditable core. The AI is the operational layer around it, and it is **optional and
+degrades safely**: with no API key the formula and template brief run exactly as
+shown above. Enable it with `--llm` (set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`) and
+the model does two things a formula cannot:
+
+1. **Messy field notes → structured assumptions.** Pass `--notes examples/field_notes.json`
+   (free text a community officer might radio in after a trigger) and the model
+   extracts bounded, reviewable signals — e.g. "access bridge washed out" → harder
+   to reach; "clinic flooded and closed" → no health facility — which feed the
+   ranking. Every override is logged and printed in the brief for human review.
+2. **Plain-language decision brief.** It writes the executive summary for the
+   authorities from the structured ranking, using only those facts.
+
+On any error or missing key it falls back to the deterministic path, so a run is
+never blocked (do-no-harm). Try it:
+
+```bash
+foreact --event examples/cyclone_trigger.json run --llm --notes examples/field_notes.json --out outputs/demo
+```
 
 ## Documentation
 

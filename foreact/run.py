@@ -9,6 +9,7 @@ from typing import Dict, List
 from .brief import write_outputs
 from .community import load_communities
 from .config import load_config
+from .enrich import enrich_communities, generate_brief_narrative, load_notes
 from .event import load_event
 from .rank import RankedCommunity, rank_communities
 
@@ -35,10 +36,15 @@ def run_pipeline(
     communities_path="data/fiji_communities.csv",
     event_path="examples/cyclone_trigger.json",
     out_dir="outputs/foreact-run",
+    use_llm=False,
+    notes_path=None,
 ) -> RunResult:
     config = load_config(config_path)
     event = load_event(event_path)
     communities = load_communities(communities_path)
+    notes = load_notes(notes_path)
+    communities, signals = enrich_communities(communities, notes, use_llm=use_llm)
     ranked = rank_communities(communities, event, config)
-    outputs = write_outputs(ranked, event, config, out_dir)
+    narrative = generate_brief_narrative(ranked, event, config, use_llm=use_llm)
+    outputs = write_outputs(ranked, event, config, out_dir, narrative=narrative, note_signals=signals)
     return RunResult(ranked=ranked, outputs=outputs)

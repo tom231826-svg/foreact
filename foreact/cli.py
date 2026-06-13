@@ -27,6 +27,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     run = sub.add_parser("run", help="rank communities and generate a decision brief")
     run.add_argument("--out", default="outputs/foreact-run", help="output directory")
+    run.add_argument("--llm", action="store_true",
+                     help="use an AI backend to read field notes and write the brief (falls back to templates)")
+    run.add_argument("--notes", default=None, help="optional field-notes JSON (community_id -> free text)")
     return parser
 
 
@@ -63,6 +66,8 @@ def _cmd_run(args) -> int:
         communities_path=args.communities,
         event_path=args.event,
         out_dir=args.out,
+        use_llm=args.llm,
+        notes_path=args.notes,
     )
     print(result.summary())
     return 0

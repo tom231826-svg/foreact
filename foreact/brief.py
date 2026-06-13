@@ -21,6 +21,8 @@ def write_outputs(
     out_dir="outputs/foreact-run",
     *,
     generated_at: Optional[datetime] = None,
+    narrative: Optional[str] = None,
+    note_signals: Optional[dict] = None,
 ) -> Dict[str, Path]:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -30,9 +32,15 @@ def write_outputs(
         "ranked_csv": out / "ranked_communities.csv",
         "decision_log": out / "decision_log.json",
     }
-    paths["brief"].write_text(render_brief(ranked, event, config, now), encoding="utf-8")
+    paths["brief"].write_text(
+        render_brief(ranked, event, config, now, narrative=narrative, note_signals=note_signals),
+        encoding="utf-8",
+    )
     _write_csv(paths["ranked_csv"], ranked)
-    paths["decision_log"].write_text(json.dumps(decision_log(ranked, event, config, now), indent=2), encoding="utf-8")
+    paths["decision_log"].write_text(
+        json.dumps(decision_log(ranked, event, config, now, narrative=narrative, note_signals=note_signals), indent=2),
+        encoding="utf-8",
+    )
     return paths
 
 
@@ -41,6 +49,8 @@ def render_brief(
     event: TriggerEvent,
     config: CountryConfig,
     generated_at: datetime,
+    narrative: Optional[str] = None,
+    note_signals: Optional[dict] = None,
 ) -> str:
     title = f"# ForeAct anticipatory-action brief: {event.id}"
     trigger = "YES" if event.official_trigger else "NO - planning mode only"
@@ -61,9 +71,16 @@ def render_brief(
         "",
         "> Advisory decision support only. A human authority must review assumptions, local access and stock availability before deployment.",
         "",
-        "## Top Priorities",
-        "",
     ]
+    if narrative:
+        lines += ["## AI summary (for human review)", "", narrative.strip(), ""]
+    if note_signals:
+        lines += ["## AI field-note signals applied", ""]
+        for signal in note_signals.values():
+            flag_text = f" [flags: {', '.join(signal.flags)}]" if signal.flags else ""
+            lines.append(f"- **{signal.community_id}**: {signal.summary}{flag_text} (source: {signal.source})")
+        lines.append("")
+    lines += ["## Top Priorities", ""]
     if not ranked:
         lines.append("No communities matched the current trigger zones.")
     for index, item in enumerate(ranked, start=1):
@@ -114,7 +131,23 @@ def decision_log(
     event: TriggerEvent,
     config: CountryConfig,
     generated_at: datetime,
+    narrative: Optional[str] = None,
+    note_signals: Optional[dict] = None,
 ) -> dict:
+    ai = {
+        "narrative": narrative,
+        "note_signals": [
+            {
+                "community_id": s.community_id,
+                "summary": s.summary,
+                "access_override": s.access_override,
+                "health_facility_override": s.health_facility_override,
+                "flags": s.flags,
+                "source": s.source,
+            }
+            for s in (note_signals or {}).values()
+        ],
+    }
     return {
         "generated_at": generated_at.isoformat(),
         "event": {
@@ -147,6 +180,7 @@ def decision_log(
             }
             for item in ranked
         ],
+        "ai": ai,
     }
 
 

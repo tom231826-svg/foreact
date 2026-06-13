@@ -13,6 +13,7 @@ authors = [{ name = "ForeAct contributors" }]
 keywords = ["climate", "anticipatory-action", "disaster-risk", "decision-support", "digital-public-good", "fiji", "pacific"]
 dependencies = [
     "PyYAML>=6.0",
+    "requests>=2.31",
 ]
 
 [project.optional-dependencies]
