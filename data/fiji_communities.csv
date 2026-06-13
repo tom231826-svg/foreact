@@ -1,0 +1,13 @@
+id,name,division,lat,lon,population,older_adults,children_under5,disability_count,shelter_capacity,health_facility,access_score,poverty_score,cyclone_exposure,flood_exposure
+fji-ba-001,Nailaga,Western,-17.520,177.680,4200,410,360,190,1200,true,0.42,0.58,0.74,0.62
+fji-ra-002,Nakorotubu,Western,-17.350,178.210,2700,330,260,120,450,false,0.78,0.64,0.86,0.55
+fji-ba-003,Votua,Western,-17.470,177.760,1800,160,140,70,300,false,0.67,0.52,0.68,0.70
+fji-ta-004,Nadi peri-urban,Western,-17.790,177.430,9800,650,790,310,3800,true,0.25,0.46,0.57,0.82
+fji-re-005,Nasinu lowlands,Central,-18.070,178.520,12200,840,960,430,5400,true,0.20,0.38,0.45,0.73
+fji-na-006,Navua river settlements,Central,-18.220,178.170,5100,390,430,210,1100,true,0.50,0.61,0.49,0.88
+fji-ca-007,Vunidogoloa relocation area,Northern,-16.620,179.050,1250,130,120,55,180,false,0.82,0.68,0.79,0.66
+fji-bu-008,Savusavu coast,Northern,-16.780,179.330,3600,290,310,150,900,true,0.46,0.43,0.63,0.60
+fji-ka-009,Kadavu coastal villages,Eastern,-19.050,178.250,2100,210,180,95,250,false,0.90,0.72,0.91,0.57
+fji-la-010,Lau outer islands,Eastern,-18.200,179.850,1600,180,130,75,220,false,0.95,0.70,0.88,0.42
+fji-re-011,Rewa delta villages,Central,-18.110,178.610,4400,360,390,180,1000,false,0.55,0.59,0.51,0.92
+fji-ta-012,Sigatoka valley settlements,Western,-18.140,177.510,3300,260,280,130,850,true,0.48,0.50,0.61,0.78

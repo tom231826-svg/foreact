@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "foreact"
+version = "0.1.0"
+description = "Open-source AI anticipatory-action decision support for Fiji and other LDCs/SIDS"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "ForeAct contributors" }]
+keywords = ["climate", "anticipatory-action", "disaster-risk", "decision-support", "digital-public-good", "fiji", "pacific"]
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-cov>=4.0"]
+
+[project.scripts]
+foreact = "foreact.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/tom231826-svg/foreact"
+Issues = "https://github.com/tom231826-svg/foreact/issues"
+
+[tool.setuptools.packages.find]
+include = ["foreact*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

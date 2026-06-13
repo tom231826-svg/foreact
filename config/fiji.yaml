@@ -1,0 +1,53 @@
+country: Fiji
+currency: FJD
+lead_time_hours: 72
+max_ranked_communities: 10
+
+weights:
+  hazard: 0.38
+  vulnerability: 0.24
+  capacity_gap: 0.23
+  access: 0.15
+
+priority_thresholds:
+  critical: 0.72
+  high: 0.58
+  medium: 0.42
+
+institutions:
+  - Fiji National Disaster Management Office
+  - Fiji Meteorological Service
+  - Ministry of Health and Medical Services
+  - Fiji Red Cross Society
+
+data_sources:
+  - Official anticipatory-action trigger event file
+  - Community exposure and vulnerability CSV
+  - OpenStreetMap-style facilities and shelter fields
+  - WorldPop-style aggregate population fields
+
+actions:
+  - name: Shelter reinforcement kit
+    unit: kit
+    unit_cost: 140
+    per_people: 80
+    hazards: [cyclone, storm]
+    description: Tarpaulins, rope, basic fixings and safe-shelter materials.
+  - name: WASH family kit
+    unit: kit
+    unit_cost: 75
+    per_people: 50
+    hazards: [cyclone, flood, storm]
+    description: Water treatment, soap, buckets and hygiene supplies.
+  - name: Health outreach team-day
+    unit: team-day
+    unit_cost: 420
+    per_people: 400
+    hazards: [cyclone, flood, storm]
+    description: Mobile health outreach and danger-sign checks.
+  - name: Evacuation transport voucher block
+    unit: block
+    unit_cost: 250
+    per_people: 120
+    hazards: [cyclone, flood, storm]
+    description: Transport support for high-risk households.

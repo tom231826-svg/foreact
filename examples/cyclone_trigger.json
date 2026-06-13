@@ -1,0 +1,32 @@
+{
+  "id": "TC-DEMO-2026-01",
+  "hazard": "cyclone",
+  "issued_at": "2026-06-13T06:00:00+12:00",
+  "source": "Illustrative official anticipatory-action trigger fixture",
+  "official_trigger": true,
+  "confidence": 0.82,
+  "notes": "Synthetic demo event for the ForeAct prototype. Replace with an endorsed Fiji AA trigger before any operational use.",
+  "impact_zones": [
+    {
+      "division": "Western",
+      "wind_kmh": 150,
+      "rainfall_mm": 220,
+      "flood_probability": 0.76,
+      "lead_time_hours": 48
+    },
+    {
+      "division": "Central",
+      "wind_kmh": 105,
+      "rainfall_mm": 260,
+      "flood_probability": 0.88,
+      "lead_time_hours": 60
+    },
+    {
+      "division": "Eastern",
+      "wind_kmh": 165,
+      "rainfall_mm": 180,
+      "flood_probability": 0.55,
+      "lead_time_hours": 72
+    }
+  ]
+}

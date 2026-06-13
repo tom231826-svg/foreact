@@ -1,0 +1,25 @@
+{
+  "id": "FLOOD-DEMO-2026-01",
+  "hazard": "flood",
+  "issued_at": "2026-06-13T06:00:00+12:00",
+  "source": "Illustrative flood anticipatory-action trigger fixture",
+  "official_trigger": true,
+  "confidence": 0.78,
+  "notes": "Synthetic flood event for testing the flood-specific ranking path.",
+  "impact_zones": [
+    {
+      "division": "Central",
+      "wind_kmh": 40,
+      "rainfall_mm": 310,
+      "flood_probability": 0.93,
+      "lead_time_hours": 36
+    },
+    {
+      "division": "Western",
+      "wind_kmh": 50,
+      "rainfall_mm": 240,
+      "flood_probability": 0.81,
+      "lead_time_hours": 48
+    }
+  ]
+}
