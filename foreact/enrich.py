@@ -41,7 +41,7 @@ def load_notes(path) -> Dict[str, str]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"{path}: field notes must be a JSON object of community_id -> note text")
-    return {str(k): str(v) for k, v in data.items()}
+    return {str(k): str(v) for k, v in data.items() if not str(k).startswith("_")}
 
 
 def enrich_communities(
@@ -108,10 +108,13 @@ def _extract_signal(community: Community, note: str) -> NoteSignal:
 
 def _apply_signal(community: Community, signal: NoteSignal) -> Community:
     changes = {}
-    if signal.access_override is not None:
+    # Conservative do-no-harm rule: AI-extracted field notes can escalate
+    # planning risk automatically, but cannot de-escalate a community or mark a
+    # closed/missing facility as available without human review.
+    if signal.access_override is not None and signal.access_override > community.access_score:
         changes["access_score"] = signal.access_override
-    if signal.health_facility_override is not None:
-        changes["health_facility"] = signal.health_facility_override
+    if signal.health_facility_override is False:
+        changes["health_facility"] = False
     return replace(community, **changes) if changes else community
 
 

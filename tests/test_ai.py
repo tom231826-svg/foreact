@@ -30,13 +30,13 @@ def _ranked():
 
 
 def test_active_provider_none(monkeypatch):
-    monkeypatch.setenv("HEATLINE_LLM_PROVIDER", "none")
+    monkeypatch.setenv("FOREACT_LLM_PROVIDER", "none")
     assert llm.active_provider() == "none"
     assert llm.available() is False
 
 
 def test_active_provider_unknown_raises_but_available_is_safe(monkeypatch):
-    monkeypatch.setenv("HEATLINE_LLM_PROVIDER", "wizard")
+    monkeypatch.setenv("FOREACT_LLM_PROVIDER", "wizard")
     with pytest.raises(llm.LLMError):
         llm.active_provider()
     assert llm.available() is False  # available() must never raise
@@ -46,7 +46,7 @@ def test_load_notes(tmp_path):
     assert load_notes(None) == {}
     assert load_notes(tmp_path / "missing.json") == {}
     good = tmp_path / "n.json"
-    good.write_text('{"fji-ba-001": "bridge out"}', encoding="utf-8")
+    good.write_text('{"_README": "ignore me", "fji-ba-001": "bridge out"}', encoding="utf-8")
     assert load_notes(good) == {"fji-ba-001": "bridge out"}
     bad = tmp_path / "bad.json"
     bad.write_text('["not", "a", "map"]', encoding="utf-8")
@@ -62,11 +62,44 @@ def test_enrich_without_llm_returns_unchanged():
 
 
 def test_enrich_provider_none_ignores_notes(monkeypatch):
-    monkeypatch.setenv("HEATLINE_LLM_PROVIDER", "none")
+    monkeypatch.setenv("FOREACT_LLM_PROVIDER", "none")
     communities = load_communities(path("data/fiji_communities.csv"))
     out, signals = enrich_communities(communities, {"fji-ba-001": "bridge washed out"}, use_llm=True)
     assert out == communities  # no backend -> safe fallback, scorer sees original data
     assert signals == {}
+
+
+def test_enrich_with_fake_llm_applies_bounded_signal(monkeypatch):
+    communities = load_communities(path("data/fiji_communities.csv"))
+    target = next(c for c in communities if c.id == "fji-ba-001")
+    monkeypatch.setattr(llm, "available", lambda: True)
+    monkeypatch.setattr(llm, "active_provider", lambda: "test")
+    monkeypatch.setattr(
+        llm,
+        "generate",
+        lambda *args, **kwargs: '{"summary":"bridge out and clinic closed","access_score":1.7,"health_facility":false,"flags":["access","health"]}',
+    )
+
+    out, signals = enrich_communities(communities, {"fji-ba-001": "bridge out"}, use_llm=True)
+    adjusted = next(c for c in out if c.id == "fji-ba-001")
+
+    assert adjusted.access_score == 1.0  # clamped to safe range
+    assert adjusted.health_facility is False
+    assert signals["fji-ba-001"].summary == "bridge out and clinic closed"
+    assert signals["fji-ba-001"].source == "llm:test"
+    assert target.access_score != adjusted.access_score
+
+
+def test_apply_signal_does_not_deescalate_without_human_review():
+    from foreact.enrich import _apply_signal
+    communities = load_communities(path("data/fiji_communities.csv"))
+    target = next(c for c in communities if c.id == "fji-ba-001")
+    signal = NoteSignal("fji-ba-001", "new road open and clinic available", 0.1, True, [], "llm:test")
+
+    adjusted = _apply_signal(target, signal)
+
+    assert adjusted.access_score == target.access_score
+    assert adjusted.health_facility == target.health_facility
 
 
 def test_narrative_none_without_llm():

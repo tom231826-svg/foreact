@@ -5,16 +5,14 @@ an LLM: with no key configured the deterministic scorer and templates run exactl
 as before, so a run is never blocked by a missing key or a provider outage
 (do-no-harm). Configure via:
 
-  HEATLINE_LLM_PROVIDER  anthropic | openai | none   (default: auto-detect)
-  HEATLINE_LLM_MODEL     model id override
+  FOREACT_LLM_PROVIDER  anthropic | openai | none   (default: auto-detect)
+  FOREACT_LLM_MODEL     model id override
   ANTHROPIC_API_KEY / OPENAI_API_KEY
 """
 
 from __future__ import annotations
 
 import os
-
-import requests
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -30,19 +28,19 @@ class LLMError(RuntimeError):
 
 def active_provider() -> str:
     """Resolve which backend to use: 'anthropic', 'openai' or 'none'."""
-    forced = os.environ.get("HEATLINE_LLM_PROVIDER", "").strip().lower()
+    forced = _env("FOREACT_LLM_PROVIDER", "HEATLINE_LLM_PROVIDER").strip().lower()
     if forced == "none":
         return "none"
     if forced == "anthropic":
         if not os.environ.get("ANTHROPIC_API_KEY"):
-            raise LLMError("HEATLINE_LLM_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set")
+            raise LLMError("FOREACT_LLM_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set")
         return "anthropic"
     if forced == "openai":
         if not os.environ.get("OPENAI_API_KEY"):
-            raise LLMError("HEATLINE_LLM_PROVIDER=openai but OPENAI_API_KEY is not set")
+            raise LLMError("FOREACT_LLM_PROVIDER=openai but OPENAI_API_KEY is not set")
         return "openai"
     if forced:
-        raise LLMError(f"unknown HEATLINE_LLM_PROVIDER {forced!r} (use anthropic, openai or none)")
+        raise LLMError(f"unknown FOREACT_LLM_PROVIDER {forced!r} (use anthropic, openai or none)")
     if os.environ.get("ANTHROPIC_API_KEY"):
         return "anthropic"
     if os.environ.get("OPENAI_API_KEY"):
@@ -69,7 +67,9 @@ def generate(system: str, user: str, max_tokens: int = 600) -> str:
 
 
 def _anthropic(system: str, user: str, max_tokens: int) -> str:  # pragma: no cover - network
-    model = os.environ.get("HEATLINE_LLM_MODEL", DEFAULT_ANTHROPIC_MODEL)
+    import requests
+
+    model = _env("FOREACT_LLM_MODEL", "HEATLINE_LLM_MODEL") or DEFAULT_ANTHROPIC_MODEL
     resp = requests.post(
         ANTHROPIC_URL,
         timeout=REQUEST_TIMEOUT_S,
@@ -98,7 +98,9 @@ def _anthropic(system: str, user: str, max_tokens: int) -> str:  # pragma: no co
 
 
 def _openai(system: str, user: str, max_tokens: int) -> str:  # pragma: no cover - network
-    model = os.environ.get("HEATLINE_LLM_MODEL", DEFAULT_OPENAI_MODEL)
+    import requests
+
+    model = _env("FOREACT_LLM_MODEL", "HEATLINE_LLM_MODEL") or DEFAULT_OPENAI_MODEL
     resp = requests.post(
         OPENAI_URL,
         timeout=REQUEST_TIMEOUT_S,
@@ -122,3 +124,8 @@ def _openai(system: str, user: str, max_tokens: int) -> str:  # pragma: no cover
     if not text or not text.strip():
         raise LLMError("OpenAI returned an empty message")
     return text.strip()
+
+
+def _env(primary: str, legacy: str) -> str:
+    """Read ForeAct-specific env vars first, with legacy toolkit fallback."""
+    return os.environ.get(primary) or os.environ.get(legacy, "")
