@@ -67,8 +67,8 @@ Open `outputs/demo/brief.md` after running the sample.
 The scoring formula is deliberately transparent, testable and deterministic — the
 auditable core. The AI is the operational layer around it, and it is **optional and
 degrades safely**: with no API key the formula and template brief run exactly as
-shown above. Enable it with `--llm` (set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`;
-optionally `FOREACT_LLM_PROVIDER=anthropic|openai|none`) and the model does two
+shown above. Enable it with `--llm` and `OPENAI_API_KEY` to use `gpt-6-luna`
+(`reasoning_effort=none`, bounded `max_completion_tokens`). The model does two
 things a formula cannot:
 
 1. **Messy field notes → structured assumptions.** Pass `--notes examples/field_notes.json`
@@ -85,8 +85,16 @@ On any error or missing key it falls back to the deterministic path, so a run is
 never blocked (do-no-harm). Try it:
 
 ```bash
+export OPENAI_API_KEY=sk-...
 foreact --event examples/cyclone_trigger.json run --llm --notes examples/field_notes.json --out outputs/demo
 ```
+
+`FOREACT_LLM_PROVIDER=openai|anthropic|none` and `FOREACT_LLM_MODEL` remain
+explicit overrides, with legacy `HEATLINE_LLM_*` fallbacks. Anthropic requires
+an explicit provider selection plus `ANTHROPIC_API_KEY`; it is never selected
+automatically. Without an OpenAI key, the default stays deterministic. Clear old
+provider/model overrides under both prefixes to use Luna. See the
+[Luna API documentation](https://developers.openai.com/api/docs/models/gpt-6-luna).
 
 ## Documentation
 

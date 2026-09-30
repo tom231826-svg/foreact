@@ -5,9 +5,10 @@ an LLM: with no key configured the deterministic scorer and templates run exactl
 as before, so a run is never blocked by a missing key or a provider outage
 (do-no-harm). Configure via:
 
-  FOREACT_LLM_PROVIDER  anthropic | openai | none   (default: auto-detect)
+  FOREACT_LLM_PROVIDER  openai | anthropic | none   (default: OpenAI if keyed)
   FOREACT_LLM_MODEL     model id override
-  ANTHROPIC_API_KEY / OPENAI_API_KEY
+  OPENAI_API_KEY        enables GPT-6 Luna by default
+  ANTHROPIC_API_KEY     used only with an explicit anthropic provider override
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-6"
-DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+DEFAULT_OPENAI_MODEL = "gpt-6-luna"
 REQUEST_TIMEOUT_S = 60
 
 
@@ -41,8 +42,6 @@ def active_provider() -> str:
         return "openai"
     if forced:
         raise LLMError(f"unknown FOREACT_LLM_PROVIDER {forced!r} (use anthropic, openai or none)")
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        return "anthropic"
     if os.environ.get("OPENAI_API_KEY"):
         return "openai"
     return "none"
@@ -60,7 +59,7 @@ def generate(system: str, user: str, max_tokens: int = 600) -> str:
     """One-shot generation with the active provider."""
     provider = active_provider()
     if provider == "none":
-        raise LLMError("no LLM provider configured (set ANTHROPIC_API_KEY or OPENAI_API_KEY)")
+        raise LLMError("no LLM provider configured (set OPENAI_API_KEY for GPT-6 Luna)")
     if provider == "anthropic":
         return _anthropic(system, user, max_tokens)
     return _openai(system, user, max_tokens)
@@ -107,7 +106,8 @@ def _openai(system: str, user: str, max_tokens: int) -> str:  # pragma: no cover
         headers={"Authorization": "Bearer " + os.environ["OPENAI_API_KEY"]},
         json={
             "model": model,
-            "max_tokens": max_tokens,
+            "max_completion_tokens": max_tokens,
+            **({"reasoning_effort": "none"} if model == DEFAULT_OPENAI_MODEL else {}),
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
